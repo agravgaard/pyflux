@@ -55,7 +55,7 @@ class GARCH(tsm.TSM):
         self.data, self.data_name, self.is_pandas, self.index = dc.data_check(data,target)
         self.data_length = self.data.shape[0]
         self._create_latent_variables()
-        
+
     def _create_latent_variables(self):
         """ Creates model latent variables
 
@@ -66,7 +66,7 @@ class GARCH(tsm.TSM):
 
         self.latent_variables.add_z('Vol Constant', fam.Normal(0,3,transform='exp'), fam.Normal(0,3))
         self.latent_variables.z_list[0].start = -7.00
-        
+
         for q_term in range(self.q):
             self.latent_variables.add_z('q(' + str(q_term+1) + ')', fam.Normal(0,0.5,transform='logit'), fam.Normal(0,3))
             if q_term == 0:
@@ -80,7 +80,7 @@ class GARCH(tsm.TSM):
                 self.latent_variables.z_list[-1].start = 3.00
             else:
                 self.latent_variables.z_list[-1].start = -4.00
-        
+
         self.latent_variables.add_z('Returns Constant', fam.Normal(0,3,transform=None), fam.Normal(0,3))
 
     def _model(self, beta):
@@ -113,7 +113,7 @@ class GARCH(tsm.TSM):
 
         # ARCH terms
         if self.q != 0:
-            for i in range(0,self.q):   
+            for i in range(0,self.q):
                 X = np.vstack((X,xeps[(self.max_lag-i-1):-i-1]))
             sigma2 = np.matmul(np.transpose(X),parm[0:-self.p-1])
         else:
@@ -125,7 +125,7 @@ class GARCH(tsm.TSM):
 
     def _mb_model(self, beta, mini_batch):
         """ Creates the structure of the model (model matrices etc) for mini batch model.
-        
+
         Here the structure is the same as for _normal_model() but we are going to
         sample a random choice of data points (of length mini_batch).
 
@@ -144,7 +144,7 @@ class GARCH(tsm.TSM):
 
         Y : np.ndarray
             Contains the length-adjusted time series (accounting for lags)
-        """     
+        """
 
         # Transform latent variables
         parm = np.array([self.latent_variables.z_list[k].prior.transform(beta[k]) for k in range(beta.shape[0])])
@@ -160,7 +160,7 @@ class GARCH(tsm.TSM):
 
         # ARCH terms
         if self.q != 0:
-            for i in range(0,self.q):   
+            for i in range(0,self.q):
                 X = np.vstack((X,xeps[(self.max_lag-i-1):-i-1]))
             sigma2 = np.matmul(np.transpose(X),parm[0:-self.p-1])
         else:
@@ -193,13 +193,13 @@ class GARCH(tsm.TSM):
         Returns
         ----------
         h-length vector of mean predictions
-        """     
+        """
 
         # Create arrays to iteratre over
         sigma2_exp = sigma2.copy()
         scores_exp = scores.copy()
 
-        # Loop over h time periods          
+        # Loop over h time periods
         for t in range(0,h):
             new_value = t_params[0]
 
@@ -211,7 +211,7 @@ class GARCH(tsm.TSM):
             # GARCH
             if self.p != 0:
                 for k in range(1,self.p+1):
-                    new_value += t_params[k+self.q]*sigma2_exp[-k]                  
+                    new_value += t_params[k+self.q]*sigma2_exp[-k]
 
             sigma2_exp = np.append(sigma2_exp,[new_value]) # For indexing consistency
             scores_exp = np.append(scores_exp,[0]) # expectation of score is zero
@@ -244,16 +244,16 @@ class GARCH(tsm.TSM):
         Returns
         ----------
         Matrix of simulations
-        """     
+        """
 
         sim_vector = np.zeros([simulations,h])
 
         for n in range(0,simulations):
-            # Create arrays to iteratre over        
+            # Create arrays to iteratre over
             sigma2_exp = sigma2.copy()
             scores_exp = scores.copy()
 
-            # Loop over h time periods          
+            # Loop over h time periods
             for t in range(0,h):
                 new_value = t_params[0]
 
@@ -263,7 +263,7 @@ class GARCH(tsm.TSM):
 
                 if self.p != 0:
                     for k in range(1,self.p+1):
-                        new_value += t_params[k+self.q]*sigma2_exp[-k]  
+                        new_value += t_params[k+self.q]*sigma2_exp[-k]
 
                 sigma2_exp = np.append(sigma2_exp,[new_value]) # For indexing consistency
                 scores_exp = np.append(scores_exp,scores[np.random.randint(scores.shape[0])]) # expectation of score is zero
@@ -286,7 +286,7 @@ class GARCH(tsm.TSM):
         Returns
         ----------
         Matrix of simulations
-        """     
+        """
 
         sim_vector = np.zeros([simulations,h])
 
@@ -296,11 +296,11 @@ class GARCH(tsm.TSM):
             sigma2, Y, scores = self._model(t_z)
             t_z = np.array([self.latent_variables.z_list[k].prior.transform(t_z[k]) for k in range(t_z.shape[0])])
 
-            # Create arrays to iteratre over        
+            # Create arrays to iteratre over
             sigma2_exp = sigma2.copy()
             scores_exp = scores.copy()
 
-            # Loop over h time periods          
+            # Loop over h time periods
             for t in range(0,h):
                 new_value = t_z[0]
 
@@ -310,7 +310,7 @@ class GARCH(tsm.TSM):
 
                 if self.p != 0:
                     for k in range(1,self.p+1):
-                        new_value += t_z[k+self.q]*sigma2_exp[-k]  
+                        new_value += t_z[k+self.q]*sigma2_exp[-k]
 
                 sigma2_exp = np.append(sigma2_exp,[new_value]) # For indexing consistency
                 scores_exp = np.append(scores_exp,scores[np.random.randint(scores.shape[0])]) # expectation of score is zero
@@ -345,16 +345,16 @@ class GARCH(tsm.TSM):
         Returns
         ----------
         Matrix of simulations
-        """     
+        """
 
         sim_vector = np.zeros([simulations,h])
 
         for n in range(0,simulations):
-            # Create arrays to iteratre over        
+            # Create arrays to iteratre over
             sigma2_exp = sigma2.copy()
             scores_exp = scores.copy()
 
-            # Loop over h time periods          
+            # Loop over h time periods
             for t in range(0,h):
                 new_value = t_params[0]
 
@@ -364,13 +364,13 @@ class GARCH(tsm.TSM):
 
                 if self.p != 0:
                     for k in range(1, self.p+1):
-                        new_value += t_params[k+self.q]*sigma2_exp[-k]  
+                        new_value += t_params[k+self.q]*sigma2_exp[-k]
 
                 sigma2_exp = np.append(sigma2_exp,[new_value]) # For indexing consistency
                 scores_exp = np.append(scores_exp,scores[np.random.randint(scores.shape[0])]) # expectation of score is zero
 
             sim_vector[n] = sigma2_exp[-h:]
-            
+
         return np.append(sigma2, np.array([np.mean(i) for i in np.transpose(sim_vector)]))
 
     def _summarize_simulations(self, sigma2, sim_vector, date_index, h, past_values):
@@ -395,7 +395,7 @@ class GARCH(tsm.TSM):
 
         intervals : Boolean
             Would you like to show prediction intervals for the forecast?
-        """ 
+        """
         mean_values = np.append(sigma2, np.array([np.mean(i) for i in sim_vector]))
         error_bars = []
         for pre in range(5,100,5):
@@ -416,7 +416,7 @@ class GARCH(tsm.TSM):
         Returns
         ----------
         The negative logliklihood of the model
-        """     
+        """
 
         sigma2, Y, __ = self._model(beta)
         parm = np.array([self.latent_variables.z_list[k].prior.transform(beta[k]) for k in range(beta.shape[0])])
@@ -436,7 +436,7 @@ class GARCH(tsm.TSM):
         Returns
         ----------
         The negative logliklihood of the model
-        """     
+        """
 
         sigma2, Y, __ = self._mb_model(beta, mini_batch)
         parm = np.array([self.latent_variables.z_list[k].prior.transform(beta[k]) for k in range(beta.shape[0])])
@@ -463,11 +463,11 @@ class GARCH(tsm.TSM):
             sigma2, Y, ___ = self._model(self.latent_variables.get_z_values())
             plt.plot(date_index, np.abs(Y-t_params[-1]), label=self.data_name + ' Absolute Demeaned Values')
             plt.plot(date_index, np.power(sigma2,0.5), label='GARCH(' + str(self.p) + ',' + str(self.q) + ') Conditional Volatility',c='black')
-            plt.title(self.data_name + " Volatility Plot")  
-            plt.legend(loc=2)   
-            plt.show()              
+            plt.title(self.data_name + " Volatility Plot")
+            plt.legend(loc=2)
+            plt.show()
 
-    def plot_predict(self, h=5, past_values=20, intervals=True, **kwargs):      
+    def plot_predict(self, h=5, past_values=20, intervals=True, **kwargs):
         """ Makes forecast with the estimated model
 
         Parameters
@@ -495,7 +495,7 @@ class GARCH(tsm.TSM):
         else:
 
             # Retrieve data, dates and (transformed) latent variables
-            sigma2, Y, scores = self._model(self.latent_variables.get_z_values())         
+            sigma2, Y, scores = self._model(self.latent_variables.get_z_values())
             date_index = self.shift_dates(h)
 
             if self.latent_variables.estimation_method in ['M-H']:
@@ -518,7 +518,7 @@ class GARCH(tsm.TSM):
             if intervals == True:
                 alpha =[0.15*i/float(100) for i in range(50,12,-2)]
                 for count, pre in enumerate(error_bars):
-                    plt.fill_between(date_index[-h-1:], error_bars[count], error_bars[-count-1], alpha=alpha[count])   
+                    plt.fill_between(date_index[-h-1:], error_bars[count], error_bars[-count-1], alpha=alpha[count])
 
             plt.plot(plot_index, plot_values)
             plt.title("Forecast for " + self.data_name + " Conditional Volatility")
@@ -546,7 +546,7 @@ class GARCH(tsm.TSM):
         Returns
         ----------
         - pd.DataFrame with predicted values
-        """     
+        """
 
         predictions = []
 
@@ -565,9 +565,9 @@ class GARCH(tsm.TSM):
                 if fit_once is True:
                     x.latent_variables = saved_lvs
                 predictions = pd.concat([predictions,x.predict(1, intervals=intervals)])
-        
+
         if intervals is True:
-            predictions.rename(columns={0:self.data_name, 1: "1% Prediction Interval", 
+            predictions.rename(columns={0:self.data_name, 1: "1% Prediction Interval",
                 2: "5% Prediction Interval", 3: "95% Prediction Interval", 4: "99% Prediction Interval"}, inplace=True)
         else:
             predictions.rename(columns={0:self.data_name}, inplace=True)
@@ -593,7 +593,7 @@ class GARCH(tsm.TSM):
 
         Returns
         ----------
-        - Plot of the forecast against data 
+        - Plot of the forecast against data
         """
         import matplotlib.pyplot as plt
         import seaborn as sns
@@ -610,8 +610,8 @@ class GARCH(tsm.TSM):
         plt.plot(date_index, np.abs(data-t_params[-1]), label='Data')
         plt.plot(date_index, np.power(predictions,0.5), label='Predictions', c='black')
         plt.title(self.data_name)
-        plt.legend(loc=2)   
-        plt.show()          
+        plt.legend(loc=2)
+        plt.show()
 
     def predict(self, h=5, intervals=False):
         """ Makes forecast with the estimated model
@@ -627,14 +627,14 @@ class GARCH(tsm.TSM):
         Returns
         ----------
         - pd.DataFrame with predicted values
-        """     
+        """
 
         if self.latent_variables.estimated is False:
             raise Exception("No latent variables estimated!")
         else:
 
             # Retrieve data, dates and (transformed) latent variables
-            sigma2, Y, scores = self._model(self.latent_variables.get_z_values())         
+            sigma2, Y, scores = self._model(self.latent_variables.get_z_values())
             date_index = self.shift_dates(h)
 
             if self.latent_variables.estimation_method in ['M-H']:
@@ -672,12 +672,12 @@ class GARCH(tsm.TSM):
                     prediction_95 = np.array([np.percentile(i, 95) for i in sim_values])
                     prediction_99 = np.array([np.percentile(i, 99) for i in sim_values])
 
-                result = pd.DataFrame([forecasted_values, prediction_01, prediction_05, 
+                result = pd.DataFrame([forecasted_values, prediction_01, prediction_05,
                     prediction_95, prediction_99]).T
-                result.rename(columns={0:self.data_name, 1: "1% Prediction Interval", 
-                    2: "5% Prediction Interval", 3: "95% Prediction Interval", 4: "99% Prediction Interval"}, 
+                result.rename(columns={0:self.data_name, 1: "1% Prediction Interval",
+                    2: "5% Prediction Interval", 3: "95% Prediction Interval", 4: "99% Prediction Interval"},
                     inplace=True)
- 
+
             result.index = date_index[-h:]
 
             return result
@@ -693,7 +693,7 @@ class GARCH(tsm.TSM):
         Returns
         ----------
         - np.ndarray of draws from the data
-        """     
+        """
         if self.latent_variables.estimation_method not in ['BBVI', 'M-H']:
             raise Exception("No latent variables estimated!")
         else:
@@ -732,7 +732,7 @@ class GARCH(tsm.TSM):
             if plot_data is True:
                 plt.plot(date_index, Y, label='Data', c='black', alpha=0.5, linestyle='', marker='s')
             plt.title(self.data_name)
-            plt.show()    
+            plt.show()
 
     def ppc(self, nsims=1000, T=np.mean):
         """ Computes posterior predictive p-value
@@ -748,7 +748,7 @@ class GARCH(tsm.TSM):
         Returns
         ----------
         - float (posterior predictive p-value)
-        """     
+        """
         if self.latent_variables.estimation_method not in ['BBVI', 'M-H']:
             raise Exception("No latent variables estimated!")
         else:
@@ -770,7 +770,7 @@ class GARCH(tsm.TSM):
 
         T : function
             A discrepancy measure - e.g. np.mean, np.std, np.max
-        """     
+        """
         if self.latent_variables.estimation_method not in ['BBVI', 'M-H']:
             raise Exception("No latent variables estimated!")
         else:
