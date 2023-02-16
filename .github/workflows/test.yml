@@ -20,7 +20,7 @@ jobs:
 
       - name: Compile and install
         run: |
-          conda create -n pyflux python=$TRAVIS_PYTHON_VERSION pytest numpy pandas scipy patsy pytest-cov cython
+          conda create -n pyflux python pytest numpy pandas scipy patsy pytest-cov cython
           source activate pyflux
           conda install -c omnia numdifftools=0.9.14
           python setup.py install
