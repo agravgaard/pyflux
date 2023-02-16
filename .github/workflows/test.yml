@@ -1,0 +1,34 @@
+---
+name: test
+
+on: [push, pull_request]
+
+jobs:
+  pytest:
+    name: pytest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install conda
+        run: |
+          wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
+          bash miniconda.sh -b -p $HOME/miniconda
+          export PATH="$HOME/miniconda/bin:$PATH"
+          conda config --set always_yes yes --set changeps1 no
+          conda update conda
+
+      - name: Compile and install
+        run: |
+          conda create -n pyflux python=$TRAVIS_PYTHON_VERSION pytest numpy pandas scipy patsy pytest-cov cython
+          source activate pyflux
+          conda install -c omnia numdifftools=0.9.14
+          python setup.py install
+
+      - name: Test
+        run: |
+          py.test -s --cov=pyflux --pyargs pyflux
+
+      - name: Coverage
+        run: |
+          coveralls
