@@ -7,28 +7,35 @@ jobs:
   pytest:
     name: pytest
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.7", "3.5"]
     steps:
       - uses: actions/checkout@v3
 
-      - name: Install conda
-        run: |
-          wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
-          bash miniconda.sh -b -p $HOME/miniconda
-          export PATH="$HOME/miniconda/bin:$PATH"
-          conda config --set always_yes yes --set changeps1 no
-          conda update conda
+      - uses: conda-incubator/setup-miniconda@v2
+        with:
+          auto-update-conda: true
+          python-version: ${{ matrix.python-version }}
+      - name: Conda info
+        shell: bash -el {0}
+        run: conda info
+
 
       - name: Compile and install
+        shell: bash -el {0}
         run: |
-          conda create -n pyflux python pytest numpy pandas scipy patsy pytest-cov cython
+          conda create -n pyflux python=${{ matrix.python-version }} pytest numpy pandas scipy patsy pytest-cov cython
           conda activate pyflux
           conda install -c omnia numdifftools=0.9.14
           python setup.py install
 
       - name: Test
+        shell: bash -el {0}
         run: |
           py.test -s --cov=pyflux --pyargs pyflux
 
       - name: Coverage
+        shell: bash -el {0}
         run: |
           coveralls
