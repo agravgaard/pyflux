@@ -62,7 +62,7 @@ class GASRank(tsm.TSM):
         self.max_team = max(np.max(self.home_id),np.max(self.away_id))
         self.original_dataframe = data
         self.data, self.data_name, self.is_pandas, self.index = dc.data_check(data, score_diff)
-        self.data = self.data.astype(np.float) 
+        self.data = self.data.astype(np.float64) 
         self.data_original = self.data.copy()
         self.data_length = self.data.shape[0]
 

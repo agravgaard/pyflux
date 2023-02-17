@@ -48,7 +48,7 @@ class LLEV(tsm.TSM):
 
         # Format the data
         self.data, self.data_name, self.is_pandas, self.index = dc.data_check(data,target)
-        self.data = self.data.astype(np.float)
+        self.data = self.data.astype(np.float64)
         self.data_original = self.data
 
         # Difference data
