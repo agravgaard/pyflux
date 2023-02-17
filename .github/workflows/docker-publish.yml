@@ -101,7 +101,7 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     container:
-      image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ needs.build.outputs.tags }}
+      image: ghcr.io/${{ github.repository }}:${{ needs.build.outputs.tags }}
     steps:
       - name: install testing framework
         run: |
