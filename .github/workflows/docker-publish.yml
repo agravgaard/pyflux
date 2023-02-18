@@ -35,6 +35,11 @@ jobs:
       tags: ${{ steps.meta.outputs.tags }}
 
     steps:
+      - name: install docker
+        run: |
+          brew install docker
+          colima start
+
       - name: Checkout repository
         uses: actions/checkout@v3
 
