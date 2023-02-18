@@ -103,7 +103,8 @@ jobs:
 
       - name: Run tests
         run: >
-          docker run --rm --entrypoint="/bin/sh" ${{ steps.meta.outputs.tags }}
-          pip install pytest-cov &&
+          docker run --rm --entrypoint="/bin/sh"
+          ${{ steps.meta.outputs.tags }} -c
+          "python -m pip install pytest-cov &&
           cd /usr/src/app &&
-          py.test -s --cov=pyflux --pyargs pyflux
+          py.test -s --cov=pyflux --pyargs pyflux"
