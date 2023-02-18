@@ -67,8 +67,8 @@ class NNARX(tsm.TSM):
         self.y, self.X = dmatrices(formula, data)
         self.y_name = self.y.design_info.describe()
         self.X_names = self.X.design_info.describe().split(" + ")
-        self.y = self.y.astype(np.float) 
-        self.X = self.X.astype(np.float) 
+        self.y = self.y.astype(np.float64) 
+        self.X = self.X.astype(np.float64) 
         self.z_no = self.X.shape[1]
         self.data_name = self.y_name
         self.y = np.array([self.y]).ravel()
