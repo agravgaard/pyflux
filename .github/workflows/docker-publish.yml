@@ -101,10 +101,9 @@ jobs:
         # against the sigstore community Fulcio instance.
         run: echo "${{ steps.meta.outputs.tags }}" | xargs -I {} cosign sign {}@${{ steps.build-and-push.outputs.digest }}
 
-      - uses: addnab/docker-run-action@v3
-        with:
-          image: ${{ steps.meta.outputs.tags }}
-          run: |
-            pip install pytest-cov
-            cd /usr/src/app
-            py.test -s --cov=pyflux --pyargs pyflux
+      - name: Run tests
+        run: >
+          docker run --rm --entrypoint="/bin/sh" ${{ steps.meta.outputs.tags }}
+          pip install pytest-cov &&
+          cd /usr/src/app &&
+          py.test -s --cov=pyflux --pyargs pyflux
