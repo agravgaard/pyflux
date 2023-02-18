@@ -65,8 +65,8 @@ class ARIMAX(tsm.TSM):
         self.y, self.X = dmatrices(formula, data)
         self.y_name = self.y.design_info.describe()
         self.X_names = self.X.design_info.describe().split(" + ")
-        self.y = self.y.astype(np.float64) 
-        self.X = self.X.astype(np.float64) 
+        self.y = self.y.astype(np.float64)
+        self.X = self.X.astype(np.float64)
         self.z_no = self.X.shape[1]
         self.data_name = self.y_name
         self.y = np.array([self.y]).ravel()
@@ -164,14 +164,14 @@ class ARIMAX(tsm.TSM):
 
         if self.scale is True:
             if self.shape is True:
-                model_shape = transformed_lvs[-1]  
+                model_shape = transformed_lvs[-1]
                 model_scale = transformed_lvs[-2]
             else:
                 model_shape = 0
                 model_scale = transformed_lvs[-1]
         else:
             model_scale = 0
-            model_shape = 0 
+            model_shape = 0
 
         if self.skewness is True:
             model_skewness = transformed_lvs[-3]
@@ -196,7 +196,7 @@ class ARIMAX(tsm.TSM):
 
         if self.scale is True:
             if self.shape is True:
-                model_shape = self.latent_variables.z_list[-1].prior.transform(transformed_lvs[-1, :]) 
+                model_shape = self.latent_variables.z_list[-1].prior.transform(transformed_lvs[-1, :])
                 model_scale = self.latent_variables.z_list[-2].prior.transform(transformed_lvs[-2, :])
             else:
                 model_shape = np.zeros(transformed_lvs.shape[1])
@@ -228,7 +228,7 @@ class ARIMAX(tsm.TSM):
 
         Y : np.ndarray
             Contains the length-adjusted time series (accounting for lags)
-        """     
+        """
 
         Y = self.y[self.max_lag:]
 
@@ -250,7 +250,7 @@ class ARIMAX(tsm.TSM):
         if self.ma != 0:
             mu = arimax_recursion(z, mu, Y, self.max_lag, Y.shape[0], self.ar, self.ma)
 
-        return mu, Y 
+        return mu, Y
 
     def _non_normal_model(self, beta):
         """ Creates the structure of the model (model matrices, etc) for
@@ -271,7 +271,7 @@ class ARIMAX(tsm.TSM):
 
         Y : np.ndarray
             Contains the length-adjusted time series (accounting for lags)
-        """     
+        """
 
         Y = self.y[self.max_lag:]
 
@@ -293,7 +293,7 @@ class ARIMAX(tsm.TSM):
         if self.ma != 0:
             mu = arimax_recursion(z, self.link(mu), Y, self.max_lag, Y.shape[0], self.ar, self.ma)
 
-        return mu, Y 
+        return mu, Y
 
     def _mb_normal_model(self, beta, mini_batch):
         """ Creates the structure of the model (model matrices, etc) for
@@ -317,7 +317,7 @@ class ARIMAX(tsm.TSM):
 
         Y : np.ndarray
             Contains the length-adjusted time series (accounting for lags)
-        """     
+        """
 
         rand_int =  np.random.randint(low=0, high=self.data_length-mini_batch-self.max_lag+1)
         sample = np.arange(start=rand_int, stop=rand_int+mini_batch)
@@ -351,7 +351,7 @@ class ARIMAX(tsm.TSM):
         if self.ma != 0:
             mu = arimax_recursion(z, mu, Y, self.max_lag, Y.shape[0], self.ar, self.ma)
 
-        return mu, Y 
+        return mu, Y
 
     def _mb_non_normal_model(self, beta, mini_batch):
         """ Creates the structure of the model (model matrices, etc) for
@@ -375,7 +375,7 @@ class ARIMAX(tsm.TSM):
 
         Y : np.ndarray
             Contains the length-adjusted time series (accounting for lags)
-        """     
+        """
 
         rand_int =  np.random.randint(low=0, high=self.data_length-mini_batch-self.max_lag+1)
         sample = np.arange(start=rand_int, stop=rand_int+mini_batch)
@@ -409,7 +409,7 @@ class ARIMAX(tsm.TSM):
         if self.ma != 0:
             mu = arimax_recursion(z, self.link(mu), Y, self.max_lag, Y.shape[0], self.ar, self.ma)
 
-        return mu, Y 
+        return mu, Y
 
     def _mean_prediction(self, mu, Y, h, t_z, X_oos):
         """ Creates a h-step ahead mean prediction
@@ -439,13 +439,13 @@ class ARIMAX(tsm.TSM):
         Returns
         ----------
         h-length vector of mean predictions
-        """     
+        """
 
         # Create arrays to iterate over
         Y_exp = Y.copy()
         mu_exp = mu.copy()
 
-        # Loop over h time periods          
+        # Loop over h time periods
         for t in range(0,h):
             new_value = 0
             if self.ar != 0:
@@ -458,8 +458,8 @@ class ARIMAX(tsm.TSM):
                         new_value += t_z[k+self.ar]*(Y_exp[-k-1]-mu_exp[-k-1])
 
             # X terms
-            new_value += np.matmul(X_oos[t,:],t_z[self.ma+self.ar:(self.ma+self.ar+len(self.X_names))])            
-            
+            new_value += np.matmul(X_oos[t,:],t_z[self.ma+self.ar:(self.ma+self.ar+len(self.X_names))])
+
             if self.model_name2 == "Exponential":
                 Y_exp = np.append(Y_exp, [1.0/self.link(new_value)])
             else:
@@ -472,7 +472,7 @@ class ARIMAX(tsm.TSM):
     def _sim_prediction(self, mu, Y, h, t_z, X_oos, simulations):
         """ Simulates a h-step ahead mean prediction (with randomly drawn disturbances)
 
-        Same as _mean_prediction() but now we repeat the process 
+        Same as _mean_prediction() but now we repeat the process
         by a number of times (simulations) and shock the process
         with random draws from the family, e.g. Normal shocks.
 
@@ -499,7 +499,7 @@ class ARIMAX(tsm.TSM):
         Returns
         ----------
         Matrix of simulations
-        """     
+        """
 
         model_scale, model_shape, model_skewness = self._get_scale_and_shape(t_z)
 
@@ -510,7 +510,7 @@ class ARIMAX(tsm.TSM):
             Y_exp = Y.copy()
             mu_exp = mu.copy()
 
-            # Loop over h time periods          
+            # Loop over h time periods
             for t in range(0, h):
                 new_value = 0
 
@@ -524,7 +524,7 @@ class ARIMAX(tsm.TSM):
                             new_value += t_z[k+self.ar]*(Y_exp[-k-1]-mu_exp[-k-1])
 
                 # X terms
-                new_value += np.matmul(X_oos[t,:], t_z[self.ma+self.ar:(self.ma+self.ar+len(self.X_names))])            
+                new_value += np.matmul(X_oos[t,:], t_z[self.ma+self.ar:(self.ma+self.ar+len(self.X_names))])
 
                 if self.model_name2 == "Exponential":
                     rnd_value = self.family.draw_variable(1.0/self.link(new_value), model_scale, model_shape, model_skewness, 1)[0]
@@ -541,7 +541,7 @@ class ARIMAX(tsm.TSM):
     def _sim_prediction_bayes(self, h, X_oos, simulations):
         """ Simulates a h-step ahead mean prediction (with randomly drawn disturbances)
 
-        Same as _mean_prediction() but now we repeat the process 
+        Same as _mean_prediction() but now we repeat the process
         by a number of times (simulations) and shock the process
         with random draws from the family, e.g. Normal shocks.
 
@@ -559,14 +559,14 @@ class ARIMAX(tsm.TSM):
         Returns
         ----------
         Matrix of simulations
-        """     
+        """
 
         sim_vector = np.zeros([simulations,h])
 
         for n in range(0, simulations):
 
             t_z = self.draw_latent_variables(nsims=1).T[0]
-            mu, Y = self._model(t_z)  
+            mu, Y = self._model(t_z)
             t_z = np.array([self.latent_variables.z_list[k].prior.transform(t_z[k]) for k in range(t_z.shape[0])])
 
             model_scale, model_shape, model_skewness = self._get_scale_and_shape(t_z)
@@ -575,7 +575,7 @@ class ARIMAX(tsm.TSM):
             Y_exp = Y.copy()
             mu_exp = mu.copy()
 
-            # Loop over h time periods          
+            # Loop over h time periods
             for t in range(0, h):
                 new_value = 0
 
@@ -589,7 +589,7 @@ class ARIMAX(tsm.TSM):
                             new_value += t_z[k+self.ar]*(Y_exp[-k-1]-mu_exp[-k-1])
 
                 # X terms
-                new_value += np.matmul(X_oos[t,:], t_z[self.ma+self.ar:(self.ma+self.ar+len(self.X_names))])            
+                new_value += np.matmul(X_oos[t,:], t_z[self.ma+self.ar:(self.ma+self.ar+len(self.X_names))])
 
                 if self.model_name2 == "Exponential":
                     rnd_value = self.family.draw_variable(1.0/self.link(new_value), model_scale, model_shape, model_skewness, 1)[0]
@@ -606,7 +606,7 @@ class ARIMAX(tsm.TSM):
     def _summarize_simulations(self, mean_values, sim_vector, date_index, h, past_values):
         """ Produces forecasted values to plot, along with prediction intervals
 
-        This is a utility function that constructs the prediction intervals and other quantities 
+        This is a utility function that constructs the prediction intervals and other quantities
         used for plot_predict() in particular.
 
         Parameters
@@ -625,7 +625,7 @@ class ARIMAX(tsm.TSM):
 
         past_values : int
             How many past observations to include in the forecast plot
-        """         
+        """
 
         error_bars = []
         for pre in range(5,100,5):
@@ -637,7 +637,7 @@ class ARIMAX(tsm.TSM):
         plot_values = mean_values[-h-past_values:]
         plot_index = date_index[-h-past_values:]
         return error_bars, forecasted_values, plot_values, plot_index
-        
+
     def normal_neg_loglik(self, beta):
         """ Calculates the negative log-likelihood of the model for Normal family
 
@@ -649,7 +649,7 @@ class ARIMAX(tsm.TSM):
         Returns
         ----------
         The negative logliklihood of the model
-        """     
+        """
         mu, Y = self._model(beta)
         return -np.sum(ss.norm.logpdf(Y, loc=mu, scale=self.latent_variables.z_list[-1].prior.transform(beta[-1])))
 
@@ -667,7 +667,7 @@ class ARIMAX(tsm.TSM):
         Returns
         ----------
         The negative logliklihood of the model
-        """     
+        """
 
         mu, Y = self._mb_model(beta, mini_batch)
         return -np.sum(ss.norm.logpdf(Y, loc=mu, scale=self.latent_variables.z_list[-1].prior.transform(beta[-1])))
@@ -683,7 +683,7 @@ class ARIMAX(tsm.TSM):
         Returns
         ----------
         The negative logliklihood of the model
-        """     
+        """
 
         mu, Y = self._model(beta)
         transformed_parameters = np.array([self.latent_variables.z_list[k].prior.transform(beta[k]) for k in range(beta.shape[0])])
@@ -704,14 +704,14 @@ class ARIMAX(tsm.TSM):
         Returns
         ----------
         The negative logliklihood of the model
-        """     
+        """
         mu, Y = self._mb_model(beta, mini_batch)
         transformed_parameters = np.array([self.latent_variables.z_list[k].prior.transform(beta[k]) for k in range(beta.shape[0])])
         model_scale, model_shape, model_skewness = self._get_scale_and_shape(transformed_parameters)
         return self.family.neg_loglikelihood(Y, self.link(mu), model_scale, model_shape, model_skewness)
 
     def plot_fit(self, **kwargs):
-        """ 
+        """
         Plots the fit of the model against the data
         """
         import matplotlib.pyplot as plt
@@ -737,8 +737,8 @@ class ARIMAX(tsm.TSM):
         plt.plot(date_index, Y, label='Data')
         plt.plot(date_index, values_to_plot, label='ARIMA model', c='black')
         plt.title(self.data_name)
-        plt.legend(loc=2)   
-        plt.show()          
+        plt.legend(loc=2)
+        plt.show()
 
     def plot_predict(self, h=5, past_values=20, intervals=True, oos_data=None, **kwargs):
         """ Plots forecasts with the estimated model
@@ -778,7 +778,7 @@ class ARIMAX(tsm.TSM):
             X_pred = X_oos[:h]
 
             # Retrieve data, dates and (transformed) latent variables
-            mu, Y = self._model(self.latent_variables.get_z_values())         
+            mu, Y = self._model(self.latent_variables.get_z_values())
             date_index = self.shift_dates(h)
 
             if self.latent_variables.estimation_method in ['M-H']:
@@ -799,9 +799,9 @@ class ARIMAX(tsm.TSM):
                 if self.model_name2 == "Skewt":
                     model_scale, model_shape, model_skewness = self._get_scale_and_shape(t_z)
                     m1 = (np.sqrt(model_shape)*sp.gamma((model_shape-1.0)/2.0))/(np.sqrt(np.pi)*sp.gamma(model_shape/2.0))
-                    forecasted_values = mean_values[-h:] + (model_skewness - (1.0/model_skewness))*model_scale*m1 
+                    forecasted_values = mean_values[-h:] + (model_skewness - (1.0/model_skewness))*model_scale*m1
                 else:
-                    forecasted_values = mean_values[-h:] 
+                    forecasted_values = mean_values[-h:]
 
                 if intervals is True:
                     sim_values = self._sim_prediction(mu, Y, h, t_z, X_pred, 15000)
@@ -814,7 +814,7 @@ class ARIMAX(tsm.TSM):
             if intervals == True:
                 alpha =[0.15*i/float(100) for i in range(50,12,-2)]
                 for count, pre in enumerate(error_bars):
-                    plt.fill_between(date_index[-h-1:], error_bars[count], error_bars[-count-1],alpha=alpha[count])             
+                    plt.fill_between(date_index[-h-1:], error_bars[count], error_bars[-count-1],alpha=alpha[count])
             plt.plot(plot_index,plot_values)
             plt.title("Forecast for " + self.data_name)
             plt.xlabel("Time")
@@ -841,7 +841,7 @@ class ARIMAX(tsm.TSM):
         Returns
         ----------
         - pd.DataFrame with predicted values
-        """     
+        """
 
         predictions = []
 
@@ -849,7 +849,7 @@ class ARIMAX(tsm.TSM):
             data1 = self.data_original.iloc[:-h+t,:]
             data2 = self.data_original.iloc[-h+t:,:]
 
-            x = ARIMAX(ar=self.ar, ma=self.ma, integ=self.integ, formula=self.formula, 
+            x = ARIMAX(ar=self.ar, ma=self.ma, integ=self.integ, formula=self.formula,
                 data=data1, family=self.family)
 
             if fit_once is False:
@@ -865,7 +865,7 @@ class ARIMAX(tsm.TSM):
                 predictions = pd.concat([predictions,x.predict(h=1, oos_data=data2, intervals=intervals)])
 
         if intervals is True:
-            predictions.rename(columns={0:self.y_name, 1: "1% Prediction Interval", 
+            predictions.rename(columns={0:self.y_name, 1: "1% Prediction Interval",
                 2: "5% Prediction Interval", 3: "95% Prediction Interval", 4: "99% Prediction Interval"}, inplace=True)
         else:
             predictions.rename(columns={0:self.y_name}, inplace=True)
@@ -875,7 +875,7 @@ class ARIMAX(tsm.TSM):
         return predictions
 
     def plot_predict_is(self, h=5, fit_once=True, fit_method='MLE', **kwargs):
-        """ Plots dynamic in-sample forecasts with the estimated model against the data 
+        """ Plots dynamic in-sample forecasts with the estimated model against the data
 
         Parameters
         ----------
@@ -890,7 +890,7 @@ class ARIMAX(tsm.TSM):
 
         Returns
         ----------
-        - Plot of the forecast against data 
+        - Plot of the forecast against data
         """
         import matplotlib.pyplot as plt
         import seaborn as sns
@@ -902,8 +902,8 @@ class ARIMAX(tsm.TSM):
         plt.plot(predictions.index, data, label='Data')
         plt.plot(predictions.index, predictions, label='Predictions', c='black')
         plt.title(self.data_name)
-        plt.legend(loc=2)   
-        plt.show()          
+        plt.legend(loc=2)
+        plt.show()
 
     def predict(self, h=5, oos_data=None, intervals=False):
         """ Makes forecast with the estimated model
@@ -922,13 +922,13 @@ class ARIMAX(tsm.TSM):
         Returns
         ----------
         - pd.DataFrame with predicted values
-        """ 
+        """
 
         if self.latent_variables.estimated is False:
             raise Exception("No latent variables estimated!")
         else:
 
-            dep_var = self.formula.split("~")[0]
+            dep_var = self.formula.split("~")[0].strip()
             oos_data[dep_var] = oos_data[dep_var].replace(np.nan, 0)
 
             _, X_oos = dmatrices(self.formula, oos_data)
@@ -936,7 +936,7 @@ class ARIMAX(tsm.TSM):
             X_pred = X_oos[:h]
 
             # Retrieve data, dates and (transformed) latent variables
-            mu, Y = self._model(self.latent_variables.get_z_values())         
+            mu, Y = self._model(self.latent_variables.get_z_values())
             date_index = self.shift_dates(h)
 
             if self.latent_variables.estimation_method in ['M-H']:
@@ -955,9 +955,9 @@ class ARIMAX(tsm.TSM):
                 if self.model_name2 == "Skewt":
                     model_scale, model_shape, model_skewness = self._get_scale_and_shape(t_z)
                     m1 = (np.sqrt(model_shape)*sp.gamma((model_shape-1.0)/2.0))/(np.sqrt(np.pi)*sp.gamma(model_shape/2.0))
-                    forecasted_values = mean_values[-h:] + (model_skewness - (1.0/model_skewness))*model_scale*m1 
+                    forecasted_values = mean_values[-h:] + (model_skewness - (1.0/model_skewness))*model_scale*m1
                 else:
-                    forecasted_values = mean_values[-h:] 
+                    forecasted_values = mean_values[-h:]
 
                 if intervals is True:
                     sim_values = self._sim_prediction(mu, Y, h, t_z, X_pred, 15000)
@@ -976,12 +976,12 @@ class ARIMAX(tsm.TSM):
                     prediction_95 = np.array([np.percentile(i, 95) for i in sim_values])
                     prediction_99 = np.array([np.percentile(i, 99) for i in sim_values])
 
-                result = pd.DataFrame([forecasted_values, prediction_01, prediction_05, 
+                result = pd.DataFrame([forecasted_values, prediction_01, prediction_05,
                     prediction_95, prediction_99]).T
-                result.rename(columns={0:self.data_name, 1: "1% Prediction Interval", 
-                    2: "5% Prediction Interval", 3: "95% Prediction Interval", 4: "99% Prediction Interval"}, 
+                result.rename(columns={0:self.data_name, 1: "1% Prediction Interval",
+                    2: "5% Prediction Interval", 3: "95% Prediction Interval", 4: "99% Prediction Interval"},
                     inplace=True)
- 
+
             result.index = date_index[-h:]
 
             return result
@@ -997,15 +997,15 @@ class ARIMAX(tsm.TSM):
         Returns
         ----------
         - np.ndarray of draws from the data
-        """     
+        """
         if self.latent_variables.estimation_method not in ['BBVI', 'M-H']:
             raise Exception("No latent variables estimated!")
         else:
             lv_draws = self.draw_latent_variables(nsims=nsims)
             mus = [self._model(lv_draws[:,i])[0] for i in range(nsims)]
             model_scale, model_shape, model_skewness = self._get_scale_and_shape_sim(lv_draws)
-            data_draws = np.array([self.family.draw_variable(self.link(mus[i]), 
-                np.repeat(model_scale[i], mus[i].shape[0]), np.repeat(model_shape[i], mus[i].shape[0]), 
+            data_draws = np.array([self.family.draw_variable(self.link(mus[i]),
+                np.repeat(model_scale[i], mus[i].shape[0]), np.repeat(model_shape[i], mus[i].shape[0]),
                 np.repeat(model_skewness[i], mus[i].shape[0]), mus[i].shape[0]) for i in range(nsims)])
             return data_draws
 
@@ -1037,7 +1037,7 @@ class ARIMAX(tsm.TSM):
             if plot_data is True:
                 plt.plot(date_index, Y, label='Data', c='black', alpha=0.5, linestyle='', marker='s')
             plt.title(self.data_name)
-            plt.show()    
+            plt.show()
 
     def ppc(self, nsims=1000, T=np.mean):
         """ Computes posterior predictive p-value
@@ -1053,15 +1053,15 @@ class ARIMAX(tsm.TSM):
         Returns
         ----------
         - float (posterior predictive p-value)
-        """     
+        """
         if self.latent_variables.estimation_method not in ['BBVI', 'M-H']:
             raise Exception("No latent variables estimated!")
         else:
             lv_draws = self.draw_latent_variables(nsims=nsims)
             mus = [self._model(lv_draws[:,i])[0] for i in range(nsims)]
             model_scale, model_shape, model_skewness = self._get_scale_and_shape_sim(lv_draws)
-            data_draws = np.array([self.family.draw_variable(self.link(mus[i]), 
-                np.repeat(model_scale[i], mus[i].shape[0]), np.repeat(model_shape[i], mus[i].shape[0]), 
+            data_draws = np.array([self.family.draw_variable(self.link(mus[i]),
+                np.repeat(model_scale[i], mus[i].shape[0]), np.repeat(model_shape[i], mus[i].shape[0]),
                 np.repeat(model_skewness[i], mus[i].shape[0]), mus[i].shape[0]) for i in range(nsims)])
             T_sims = T(self.sample(nsims=nsims), axis=1)
             T_actual = T(self.data)
@@ -1077,7 +1077,7 @@ class ARIMAX(tsm.TSM):
 
         T : function
             A discrepancy measure - e.g. np.mean, np.std, np.max
-        """     
+        """
         if self.latent_variables.estimation_method not in ['BBVI', 'M-H']:
             raise Exception("No latent variables estimated!")
         else:
@@ -1089,8 +1089,8 @@ class ARIMAX(tsm.TSM):
             lv_draws = self.draw_latent_variables(nsims=nsims)
             mus = [self._model(lv_draws[:,i])[0] for i in range(nsims)]
             model_scale, model_shape, model_skewness = self._get_scale_and_shape_sim(lv_draws)
-            data_draws = np.array([self.family.draw_variable(self.link(mus[i]), 
-                np.repeat(model_scale[i], mus[i].shape[0]), np.repeat(model_shape[i], mus[i].shape[0]), 
+            data_draws = np.array([self.family.draw_variable(self.link(mus[i]),
+                np.repeat(model_scale[i], mus[i].shape[0]), np.repeat(model_shape[i], mus[i].shape[0]),
                 np.repeat(model_skewness[i], mus[i].shape[0]), mus[i].shape[0]) for i in range(nsims)])
             T_sim = T(self.sample(nsims=nsims), axis=1)
             T_actual = T(self.data)
