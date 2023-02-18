@@ -770,7 +770,7 @@ class ARIMAX(tsm.TSM):
             raise Exception("No latent variables estimated!")
         else:
 
-            dep_var = self.formula.split("~")[0]
+            dep_var = self.formula.split("~")[0].strip()
             oos_data[dep_var] = oos_data[dep_var].replace(np.nan, 0)
 
             _, X_oos = dmatrices(self.formula, oos_data)
